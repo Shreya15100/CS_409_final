@@ -7,7 +7,7 @@ var router = express.Router();
 
 module.exports = function (router) {
 
-    var homeRoute = router.route('/');
+    var homeRoute = router.route('/ho');
 
     homeRoute.get(function (req, res) {
         var connectionString = secrets.token;
@@ -18,8 +18,8 @@ module.exports = function (router) {
 
     usersRoute.get(function (req,res) {
 
-        var uname = req.body.username
-        var pass = req.body.password
+        var uname = req.query.username
+        var pass = req.query.password
 
         var query = User.find({u_name : uname});
 
@@ -30,20 +30,20 @@ module.exports = function (router) {
                     "data": {}
                 });
             } else {
-                if(!users) {
+                if(users.length == 0) {
                     res.status(404).json({
                         "message": "User Not Found",
                         "data": {}
-                    });  
+                    }); 
                 } else {
                     if (users[0].pass === pass) {
-                        res.status(200).json({
+                        res.json({
                             "message": "OK",
                             "data": users
                         });
                     } else {
                         res.status(404).json({
-                            "message": "Users Not Found",
+                            "message": "User Not Found",
                             "data": {}
                         }); 
                     }
@@ -60,9 +60,6 @@ module.exports = function (router) {
         var uname = req.body.uname
         var pass = req.body.password
         
-        var name = req.body.name
-        var email = req.body.email
-        var date = new Date()
         var newUser;
     
         if (!fname || !lname || !uname || !pass) {
@@ -107,6 +104,157 @@ module.exports = function (router) {
                 });
             }
         });
+    })
+
+    var unameModify = router.route('/unamemodify');
+
+    unameModify.put(function (req, res){
+
+        var old_uname = req.body.olduname
+        var new_uname = req.body.newuname
+        var pass = req.body.pass
+
+        if (!old_uname || !new_uname || !pass) {
+            res.status(404).json({
+                "message": "Missing info",
+                "data": {}
+            });
+            
+            return;
+        }
+
+        User.count({"u_name": new_uname}, function(err, count) {
+
+            if(err) {
+                res.status(500).json({
+                    "message": "Error",
+                    "data": {}
+                });
+
+                return;
+                
+            } else if (count > 0) {
+
+                co = count
+
+                res.status(404).json({
+                    "message": "Username not available",
+                    "data": {}
+                });
+
+                return
+
+            } else {
+                var query = User.find({u_name : old_uname});
+
+                query.exec(function(err, users) {
+                    if(err) {
+
+                        res.status(404).json({
+                            "message": "Server Error",
+                            "data": {}
+                        });
+                    } else {
+                        if(users.length == 0) {
+                            res.status(404).json({
+                                "message": "User Not Found",
+                                "data": {}
+                            });  
+
+                            return;
+
+                        } else {
+                            if (users[0].pass === pass) {
+                                //actual change
+
+                                users[0].u_name = new_uname
+                                users[0].save()
+
+
+                                res.status(200).json({
+                                    "message": "Username changed",
+                                    "data": users[0]
+                                });
+
+                                return;
+                            
+                            } else {
+                                res.status(404).json({
+                                    "message": "User Not Found",
+                                    "data": {}
+                                }); 
+                            }
+                        }
+                    }
+                });
+            }
+
+        });
+
+    })
+
+    var passModify = router.route('/passmodify');
+
+    passModify.put(function (req, res){
+
+        var uname = req.body.uname
+        var new_pass = req.body.newpass
+        var old_pass = req.body.oldpass
+
+        if (!old_pass || !new_pass || !uname) {
+            res.status(404).json({
+                "message": "Missing info",
+                "data": {}
+            });
+            
+            return;
+        }
+
+        if (old_pass === new_pass) {
+            res.status(404).json({
+                "message": "Password should be different",
+                "data": {}
+            });
+
+            return;
+        }
+
+        var query = User.find({u_name : uname});
+
+        query.exec(function(err, users) {
+            if(err) {
+                res.status(404).json({
+                    "message": "Server Error",
+                    "data": {}
+                });
+            } else {
+                if(users.length == 0) {
+                    res.status(404).json({
+                        "message": "User Not Found",
+                        "data": {}
+                    });  
+                } else {
+                    if (users[0].pass === old_pass) {
+                        //actual change
+
+                        users[0].pass = new_pass
+                        users[0].save()
+
+                        res.status(200).json({
+                            "message": "Password changed",
+                            "data": users[0]
+                        });
+                    
+                    } else {
+                        res.status(404).json({
+                            "message": "Users Not Found",
+                            "data": {}
+                        }); 
+                    }
+                }
+            }
+        });
+
     })
 
     /*usersRoute.get(function (req,res) {

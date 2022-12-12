@@ -6,6 +6,7 @@ import Home from './Components/home';
 import Team from './Components/team';
 import Player from './Components/player';
 import User from './Components/user';
+import UserPage from './Components/userpage'
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
         <Route path="/teams" element={<Team/>} />
         <Route path="/players" element={<Player/>} />
         <Route path="/user" element={<User/>} />
+        <Route path="/userpage" element={<UserPage/>} />
       </Routes>
     </Router>
   );
