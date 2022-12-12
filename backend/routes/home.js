@@ -2,7 +2,6 @@ var secrets = require('../config/secrets');
 var express = require('express');
 var mongoose = require('mongoose');
 var User = require('../models/user.js');
-var Task = require('../models/task.js');
 var bodyParser = require('body-parser');
 var router = express.Router();
 
@@ -17,32 +16,66 @@ module.exports = function (router) {
 
     var usersRoute = router.route('/users');
 
+    usersRoute.get(function (req,res) {
+
+        var uname = req.body.username
+        var pass = req.body.password
+
+        var query = User.find({u_name : uname});
+
+        query.exec(function(err, users) {
+            if(err) {
+                res.status(404).json({
+                    "message": "Server Error",
+                    "data": {}
+                });
+            } else {
+                if(!users) {
+                    res.status(404).json({
+                        "message": "User Not Found",
+                        "data": {}
+                    });  
+                } else {
+                    if (users[0].pass === pass) {
+                        res.status(200).json({
+                            "message": "OK",
+                            "data": users
+                        });
+                    } else {
+                        res.status(404).json({
+                            "message": "Users Not Found",
+                            "data": {}
+                        }); 
+                    }
+                }
+            }
+        });
+
+    })
+
     usersRoute.post(function(req, res) {
+
+        var fname = req.body.fname
+        var lname = req.body.lname
+        var uname = req.body.uname
+        var pass = req.body.password
+        
         var name = req.body.name
         var email = req.body.email
         var date = new Date()
         var newUser;
     
-        if (!name) {
+        if (!fname || !lname || !uname || !pass) {
             res.status(404).json({
-                "message": "No Name",
+                "message": "Data missing",
                 "data": {}
             });
-            
-            return;
-        }
 
-        if (!email) {
-            res.status(404).json({
-                "message": "No email",
-                "data": {}
-            });
-            
             return;
         }
     
-        User.count({"email": email}, function(err, count) {
-    
+        User.count({"u_name": uname}, function(err, count) {
+
             if(err) {
                 res.status(500).json({
                     "message": "Error",
@@ -54,28 +87,29 @@ module.exports = function (router) {
     
             if(count > 0) {
                 res.status(404).json({
-                    "message": "Dupliate email",
+                    "message": "Dupliate username",
                     "data": {}
                 });
             } else {
                 newUser = new User({
-                    "name": name,
-                    "email": email,
-                    "pendingTasks": [],
-                    "dateCreated": date
+                    "f_name": fname,
+                    "l_name": lname,
+                    "u_name": uname,
+                    "pass" : pass,
+                    "teams" : []
                 });
 
                 newUser.save();
 
                 res.status(201).json({
-                    "message": "OK",
+                    "message": "User Created",
                     "data": newUser
                 });
             }
         });
     })
 
-    usersRoute.get(function (req,res) {
+    /*usersRoute.get(function (req,res) {
         var query = User.find({})
 
         if("where" in req.query) {
@@ -128,7 +162,9 @@ module.exports = function (router) {
             }
         });
         return
-    })
+    })*/
+
+    /*
 
     var tasksRoute = router.route('/tasks');
 
@@ -556,7 +592,7 @@ module.exports = function (router) {
             }
             
         })
-    })
+    })*/
 
     return router;
 }
