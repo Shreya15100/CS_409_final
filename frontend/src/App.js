@@ -7,6 +7,7 @@ import Team from './Components/team';
 import Player from './Components/player';
 import User from './Components/user';
 import UserPage from './Components/userpage'
+import tdata from './Components/data.json'
 
 function App() {
   return (
@@ -14,8 +15,8 @@ function App() {
       <Routes>
         <Route path="/" element={<SignIn/>} />
         <Route path="/sign-up" element={<SignUp/>} />
-        <Route path="/home" element={<Home/>} />
-        <Route path="/teams" element={<Team/>} />
+        <Route path="/home" element={<Home data={tdata}/>} />
+        <Route path="/teams" element={<Team data={tdata}/>} />
         <Route path="/players" element={<Player/>} />
         <Route path="/user" element={<User/>} />
         <Route path="/userpage" element={<UserPage/>} />

@@ -257,6 +257,131 @@ module.exports = function (router) {
 
     })
 
+    var teamdat = router.route('/teams');
+
+    teamdat.put(function (req, res){
+        var uname = req.body.uname
+        var tid = req.body.tid
+        var pass = req.body.pass
+
+        if (!uname || !tid) {
+            res.status(404).json({
+                "message": "Missing Info",
+                "data": {}
+            });
+            
+            return;
+        }
+
+        var query = User.find({u_name : uname});
+
+        query.exec(function(err, user) {
+            if(err) {
+                res.status(404).json({
+                    "message": "Server Error",
+                    "data": {}
+                });
+            } else {
+                if (pass !== user[0].pass) {
+                    es.status(404).json({
+                        "message": "Team alread added",
+                        "data": {}
+                    });
+                    return
+                }
+
+                var teams = user[0].teams
+
+                teams.forEach(function(item,index) {
+                    if (item == tid) {
+                        res.status(404).json({
+                            "message": "Team alread added",
+                            "data": {}
+                        });
+
+                        return;
+                    }
+                })
+
+                teams.push(tid)
+                user[0].save()
+
+                res.status(200).json({
+                    "message": "Team added",
+                    "data": user[0]
+                });
+            }
+        });
+        
+    })
+
+    teamdat.delete(function (req, res){
+        var uname = req.query.uname
+        var tid = req.query.tid
+        var pass = req.query.pass
+
+        console.log(req.body)
+
+        if (!uname || !tid || !pass) {
+            res.status(404).json({
+                "message": "Missing Info",
+                "data": {}
+            });
+            
+            return;
+        }
+
+        var query = User.find({u_name : uname});
+
+        query.exec(function(err, user) {
+            if(err) {
+                res.status(404).json({
+                    "message": "Server Error",
+                    "data": {}
+                });
+            } else {
+                if (pass !== user[0].pass) {
+                    es.status(404).json({
+                        "message": "Team alread added",
+                        "data": {}
+                    });
+                    return
+                }
+                
+                var teams = user[0].teams
+                let count = 0
+
+                teams.forEach(function(item,index) {
+                    if (item == tid) {
+                        count += 1
+                    }
+                })
+
+                if (count == 1) {
+
+                    const index = teams.indexOf(tid);
+                    teams.splice(index, 1);
+
+                    user[0].save()
+
+                    res.status(200).json({
+                        "message": "Team deleted",
+                        "data": user[0]
+                    });
+
+                    return;
+                } else {
+                    res.status(404).json({
+                        "message": "Error",
+                        "data": {}
+                    });
+                }
+                
+            }
+        });
+        
+    })
+
     /*usersRoute.get(function (req,res) {
         var query = User.find({})
 

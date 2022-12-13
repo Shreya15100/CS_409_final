@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import {useLocation} from 'react-router-dom';
 
 
-const Home = () => {
+const Home = ({data}) => {
 
   const location = useLocation();
   console.log(location)
@@ -17,6 +17,22 @@ const Home = () => {
       <h1>Invalid User. Please log back in.</h1>
     )
   }
+
+  let newFilter = []
+
+  newFilter = data.filter((value) => {
+    let id = value.id;
+    let flag = 0;
+    user.teams.forEach(function(item) {
+      if (item === id) {
+        flag = 1
+        return
+      }
+    })
+    return flag===1;
+    });
+
+    console.log(newFilter)
   
 
   return(
@@ -34,7 +50,27 @@ const Home = () => {
       </nav>
 
       <div class="parent">
-          <div class="child">Top 5 Teams</div>
+          <div class="child">User Teams</div>
+          <div classname='table'>
+            <table>
+          {newFilter.map((value, key) => {
+            
+            return (
+              
+                
+                  <tr>
+                  <td><p id="listitem">{value.full_name.toUpperCase()} </p></td>
+                  <td><p id="listitem">{value.abbreviation.toUpperCase()} </p></td>
+                  <td><p id="listitem">{value.city.toUpperCase()} </p></td>
+                  <td><p id="listitem">{value.conference.toUpperCase()} CONFERENCE</p></td>
+                  <td><p id="listitem">{value.division.toUpperCase()} DIVISON</p></td>
+                  </tr>
+                
+              
+            );
+          })}
+          </table>
+          </div>
       </div>
 
     </div>
